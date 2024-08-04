@@ -1,0 +1,152 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TypeUtilisateur {
+  INFLUENCEUR
+  MARQUE
+  ADMINISTRATEUR
+}
+
+enum StatutPaiement {
+  EN_ATTENTE
+  VALIDE
+  REJETE
+}
+
+model Utilisateur {
+  id             Int           @id @default(autoincrement())
+  nom            String
+  email          String        @unique
+  mot_de_passe   String
+  type           TypeUtilisateur
+
+  influenceur    Influenceur?
+  marque         Marque?
+  statistiques   Statistique[]
+  messagesEnvoyes Message[]    @relation("MessageExpediteur")
+  messagesRecus  Message[]     @relation("MessageDestinataire")
+
+  @@map("utilisateurs")
+}
+
+model Influenceur {
+  id                    Int          @id @default(autoincrement())
+  utilisateurId         Int          @unique
+  nombre_abonnes        Int
+  taux_engagement       Float
+  niche                 String
+  lien_reseaux_sociaux  String
+
+  partenariat           Partenariat[]
+
+  utilisateur           Utilisateur  @relation(fields: [utilisateurId], references: [id])
+
+  @@map("influenceurs")
+}
+
+model Marque {
+  id                    Int          @id @default(autoincrement())
+  utilisateurId         Int          @unique
+  nom_entreprise        String
+  description           String
+  secteur_activite      String
+  lien_site_web         String
+
+  partenariat           Partenariat[]
+
+  utilisateur           Utilisateur  @relation(fields: [utilisateurId], references: [id])
+
+  @@map("marques")
+}
+
+model Partenariat {
+  id                    Int          @id @default(autoincrement())
+  id_marque             Int
+  id_influenceur        Int
+  date_debut            DateTime
+  date_fin              DateTime
+  conditions            String
+
+  paiement              Paiement[]
+  campagne              Campagne[]
+
+  marque                Marque       @relation(fields: [id_marque], references: [id], onDelete: Cascade)
+  influenceur           Influenceur  @relation(fields: [id_influenceur], references: [id], onDelete: Cascade)
+
+  @@map("partenariats")
+}
+
+model Campagne {
+  id                    Int          @id @default(autoincrement())
+  id_partenariat        Int
+  nom                   String
+  description           String
+  budget                Float
+  date_debut            DateTime
+  date_fin              DateTime
+
+  contenuSponsorise     ContenuSponsorise[]
+
+  partenariat           Partenariat  @relation(fields: [id_partenariat], references: [id], onDelete: Cascade)
+
+  @@map("campagnes")
+}
+
+model ContenuSponsorise {
+  id                    Int          @id @default(autoincrement())
+  id_campagne           Int
+  type                  String       // "texte", "image", "vidéo"
+  contenu               String
+  lien                  String
+
+  campagne              Campagne     @relation(fields: [id_campagne], references: [id], onDelete: Cascade)
+
+  @@map("contenus_sponsorisés")
+}
+
+model Paiement {
+  id                    Int          @id @default(autoincrement())
+  id_partenariat        Int
+  montant               Float
+  date_paiement         DateTime
+  statut                StatutPaiement
+
+  partenariat           Partenariat  @relation(fields: [id_partenariat], references: [id], onDelete: Cascade)
+
+  @@map("paiements")
+}
+
+model Message {
+  id                    Int          @id @default(autoincrement())
+  id_expediteur         Int
+  id_destinataire       Int
+  contenu               String
+  date_envoi            DateTime
+
+  expediteur            Utilisateur  @relation("MessageExpediteur", fields: [id_expediteur], references: [id], onDelete: Cascade)
+  destinataire          Utilisateur  @relation("MessageDestinataire", fields: [id_destinataire], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+model Statistique {
+  id                    Int          @id @default(autoincrement())
+  id_utilisateur        Int
+  nombre_publications   Int
+  nombre_abonnes        Int
+  taux_engagement       Float
+  date_statistique      DateTime
+
+  utilisateur           Utilisateur  @relation(fields: [id_utilisateur], references: [id], onDelete: Cascade)
+
+  @@map("statistiques")
+}
