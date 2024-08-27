@@ -8,12 +8,12 @@ import { PassportModule } from '@nestjs/passport';
 
 import { JwtStrategy } from '../jwt.strategy';
 import { LocalStrategy } from '../local.strategy';
-import { UtilisateurModule } from 'src/utilisateur/utilisateur.module';
+import { UserModule } from 'src/user/user.module';
 import { PrismaModule } from 'src/prisma/prisma.module';
 
 @Module({
     imports: [
-        UtilisateurModule,
+        UserModule,
         PassportModule,
         JwtModule.register({
             secret: process.env.JWT_SECRET || 'secretKey', // Utilisez une variable d'environnement pour le secret

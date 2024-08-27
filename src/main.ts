@@ -10,9 +10,10 @@ async function bootstrap() {
 
     async function createSwaggerDocument() {
         const config = new DocumentBuilder()
-            .setTitle('Insta API')
-            .setDescription('API that manage Insta sass')
+            .setTitle('beta API')
+            .setDescription('API that manage beta sass')
             .setVersion('1.0')
+            .addBearerAuth()
             .build();
 
         const document = SwaggerModule.createDocument(app, config);
