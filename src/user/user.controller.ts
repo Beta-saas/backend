@@ -23,7 +23,6 @@ import { JwtAuthGuard } from 'src/jwt-auth.guard';
 export class UserController {
   constructor(private readonly userService: UserService) { }
 
-  @ApiBearerAuth()
   @Post()
   @ApiOperation({ summary: 'Create a new user' })
   @ApiResponse({ status: 201, description: 'The user has been successfully created.' })
